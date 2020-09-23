@@ -75,29 +75,27 @@ const updatePlayerGames = async (gameIds, playerId) => {
   for (let i = 0; i < gameIds.length; i++) {
     const exists = await PlayerGames.exists({playerGame: `${gameIds[i]}${playerId}`});
     if (!exists) {
-      const temp = await Games.findOne({_id: gameIds[i]}).exec();
+      const temp = await Games.findOne({_id: gameIds[i]}).exec()
+        .then(data => getMatchData(data.game))
+        .then(({data}) => data.info.participants);
       const tempPlayerId = await Players.findOne({_id: playerId}).exec();
-      const temp2 = await getMatchData(temp.game);
-      let gold_left, last_round, level, placement, total_damage_to_players;
-      temp2.data.info.participants.forEach(participant => {
-        if (participant.puuid === tempPlayerId.puuid) {
-          gold_left = participant.gold_left;
-          last_round = participant.last_round;
-          level = participant.level;
-          placement = participant.placement;
-          total_damage_to_players = participant.total_damage_to_players;
-        }
-      })
-      await PlayerGames.create({
+      // const temp2 = await getMatchData(temp.game);
+      const obj = {
         game: gameIds[i],
         player: playerId,
         playerGame: `${gameIds[i]}${playerId}`,
-        gold_left: gold_left,
-        last_round: last_round,
-        level: level,
-        placement: placement,
-        total_damage_to_players: total_damage_to_players,
-      });
+      };
+      // let gold_left, last_round, level, placement, total_damage_to_players;
+      temp.forEach(participant => {
+        if (participant.puuid === tempPlayerId.puuid) {
+          obj.gold_left = participant.gold_left;
+          obj.last_round = participant.last_round;
+          obj.level = participant.level;
+          obj.placement = participant.placement;
+          obj.total_damage_to_players = participant.total_damage_to_players;
+        }
+      })
+      await PlayerGames.create(obj);
     }
   }
   return PlayerGames.find({}).exec().then(data => data);
@@ -109,7 +107,14 @@ const deleteGame = async (gameId) => {
   return PlayerGames.find({}).exec().then(data => data)
 }
 
+const updateGame = async (stats) => {
+  await PlayerGames.findOneAndUpdate({playerGame: stats.playerGame}, stats);
+  return PlayerGames.find({}).exec().then(data => data)
+}
+
 module.exports.savePlayer = savePlayer;
 module.exports.saveGames = saveGames;
 module.exports.updatePlayerGames = updatePlayerGames;
 module.exports.deleteGame = deleteGame;
+module.exports.updateGame = updateGame;
+

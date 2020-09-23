@@ -13,9 +13,11 @@ class App extends React.Component {
     this.state = {
       games: [],
       finishes: [],
+      edit: false,
     }
     this.handleSearch = this.handleSearch.bind(this);
     this.deleteGame = this.deleteGame.bind(this);
+    this.editGame = this.editGame.bind(this);
   }
 
   handleSearch(username) {
@@ -39,7 +41,21 @@ class App extends React.Component {
         data.data.forEach(game => {
           temp.push(game.placement);
         });
-        this.setState({ finishes: temp });      })
+        this.setState({ finishes: temp });
+      })
+  }
+
+  editGame(stats) {
+    console.log(stats);
+    axios.put('/put', stats)
+      .then(data => {
+        this.setState({ games: data.data });
+        const temp = [];
+        data.data.forEach(game => {
+          temp.push(game.placement);
+        });
+        this.setState({ finishes: temp });
+      });
   }
 
   render() {
@@ -55,6 +71,7 @@ class App extends React.Component {
           games={games}
           finishes={finishes}
           deleteGame={this.deleteGame}
+          editGame={this.editGame}
         />
       </div>
     )
