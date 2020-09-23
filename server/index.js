@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const CLIENT_PATH = path.resolve(__dirname, '../client/dist');
 const { getPuuid, getMatches } = require('./search');
-const { savePlayer, saveGames, updatePlayerGames } = require('./database/databaseIndex');
+const { savePlayer, saveGames, updatePlayerGames, deleteGame } = require('./database/databaseIndex');
 
 const { PORT } = process.env;
 const bodyParser = require('body-parser');
@@ -31,15 +31,20 @@ app.post('/', (req, res) => {
       return getMatches(data.puuid)
     })
     .then(games => {
-      console.log(games.data);
       return saveGames(games.data, id);
     })
     .then(data => {
-      console.log(data);
       return updatePlayerGames(data, id);
     })
     .then(data => {
       res.status(201).send(data);
+    });
+})
+
+app.delete('/delete/:id', (req, res) => {
+  deleteGame(req.params.id)
+    .then(data => {
+      res.status(202).send(data);
     });
 })
 

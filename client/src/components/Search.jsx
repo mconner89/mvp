@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 const Search = ({ onSearch }) => {
-  const [username, setUserName] = useState('');
+  const [username, setUserName] = useState('sneakyrh1no');
   return (
     <div>
       <h4>View your stats</h4>
-      Enter your Riot username:{' '}
+      Enter your Riot username:{''}
       <input
         value={username}
         onKeyPress={(e) => { e.key === 'Enter' && onSearch(username); }}
         onChange={(e) => { setUserName(e.target.value); }}
+        placeholder='whatever'
       />
       <button
         type="button"

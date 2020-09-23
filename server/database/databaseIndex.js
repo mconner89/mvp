@@ -103,10 +103,13 @@ const updatePlayerGames = async (gameIds, playerId) => {
   return PlayerGames.find({}).exec().then(data => data);
 }
 
-const getPlayerGames = (username) => {
-
+const deleteGame = async (gameId) => {
+  await Games.deleteOne({_id: gameId});
+  await PlayerGames.deleteMany({game: gameId});
+  return PlayerGames.find({}).exec().then(data => data)
 }
 
 module.exports.savePlayer = savePlayer;
 module.exports.saveGames = saveGames;
 module.exports.updatePlayerGames = updatePlayerGames;
+module.exports.deleteGame = deleteGame;
