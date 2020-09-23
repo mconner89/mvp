@@ -2,8 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const CLIENT_PATH = path.resolve(__dirname, '../client/dist');
-const { getPuuid } = require('./search');
-const { savePlayer } = require('./database/databaseIndex');
+const { getPuuid, getMatches } = require('./search');
+const { savePlayer, saveGames, updatePlayerGames } = require('./database/databaseIndex');
 
 const { PORT } = process.env;
 const bodyParser = require('body-parser');
@@ -21,13 +21,25 @@ app.get('/', (req, res) => res.send('Hooray!'));
 app.get('/test', (req, res) => res.send('idk man'));
 
 app.post('/', (req, res) => {
+  let id;
   getPuuid(req.body.username)
     .then((outcome) => {
-      const puuid = outcome.data.puuid;
-      console.log(outcome.data);
-      savePlayer(outcome.data);
+      return savePlayer(outcome.data);
     })
-    .then(() => {
-      res.status(201).send('Success');
+    .then(data => {
+      id = data._id;
+      return getMatches(data.puuid)
+    })
+    .then(games => {
+      console.log(games.data);
+      return saveGames(games.data, id);
+    })
+    .then(data => {
+      console.log(data);
+      return updatePlayerGames(data, id);
+    })
+    .then(data => {
+      res.status(201).send(data);
     });
 })
+
